@@ -44,7 +44,7 @@ namespace BookSystem.Lib
             Console.Write(caption);
             string value = Console.ReadLine();
             double number;
-            if (!double.TryParse(value, out  number))
+            if (!double.TryParse(value,out  number))
             {
                 PrintError("Duzgun eded daxil edilmeyib");
                 goto l1;
