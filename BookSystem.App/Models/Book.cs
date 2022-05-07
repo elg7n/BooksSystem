@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace BookSystem.App.Models
 {
-    internal class Book:IEquatable<Book>
+    [Serializable]
+    public class Book:IEquatable<Book>
     {
         static int counter = 0;
 
@@ -25,9 +26,15 @@ namespace BookSystem.App.Models
         {
             this.Id = id;
         }
+
+        public static void SetCounter(int counter)
+        {
+            Book.counter = counter;
+        }
+
         public int Id { get; private set; }
         public string Name { get; set; }
-        public string Author { get; set; }
+        public int AuthorId { get; set; }
         public int PageCount { get; set; }
         public double Price { get; set; }
 
@@ -35,7 +42,13 @@ namespace BookSystem.App.Models
 
         public override string ToString()
         {
-            return $"{Id} {Name} {Author} {PageCount}. {Price:0.00}{Thread.CurrentThread.CurrentCulture.NumberFormat.CurrencySymbol}";
+            return $"{Id} {Name} {AuthorId} {PageCount}. {Price:0.00}{Thread.CurrentThread.CurrentCulture.NumberFormat.CurrencySymbol}";
+        }
+
+        public string ToString(Author a)
+        {
+            string data = (a == null) ?null:$"{a.Name} {a.Surname}";
+            return $"{Id} {Name} \"{data??this.AuthorId.ToString()}\" {PageCount}. {Price:0.00}{Thread.CurrentThread.CurrentCulture.NumberFormat.CurrencySymbol}";
         }
     }
 }

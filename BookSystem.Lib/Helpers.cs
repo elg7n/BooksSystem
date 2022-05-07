@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 
 namespace BookSystem.Lib
 {
     public class Helpers
-    {
+    {  
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="caption"></param>
+        /// <param name="required"></param>
+        /// <returns></returns>
         public static string ReadString(string caption, bool required = false)
         {
         l1:
@@ -117,5 +125,31 @@ namespace BookSystem.Lib
             Console.WriteLine(message);
             Console.ResetColor();
         }
+
+        public static void SaveToFile(string filename,object graphData)
+        {
+            using (var fs = new FileStream(filename,FileMode.OpenOrCreate,FileAccess.Write))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                bf.Serialize(fs,graphData);
+            }
+        }
+
+        public static object LoadFromFile(string filename)
+        {
+
+            if (!File.Exists(filename))
+            {
+                return null;
+            }
+
+            using (var fs = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                return  bf.Deserialize(fs);
+            }
+        }
+
+       
     }
 }

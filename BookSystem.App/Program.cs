@@ -12,11 +12,55 @@ namespace BookSystem.App
     {
         static void Main(string[] args)
         {
+            const string fileBooks = "books.dat";
+            const string fileAuthors = "authors.dat";
+
             Helpers.Init("Book System v1.0");
 
-            Book[] books = new Book[0];
+            var booksGraph=Helpers.LoadFromFile(fileBooks);
+            Book[] books = null;
+            if (booksGraph==null)
+            {
+                books = new Book[0];
+            }
+            else
+            {
+                books = (Book[])booksGraph;
+                int max = books.Max(b => b.Id);
 
-            Author[] authors = new Author[0];
+                /*
+                  int max = 0;
+                foreach (Book book in books)// save edende max id'ni tapib counter'e set edirik.
+                {
+                    if (book.Id>max)
+                    {
+                        max = book.Id;
+                    }
+                }
+                */
+                Book.SetCounter(max);
+            }
+
+            var authorsGraph = Helpers.LoadFromFile(fileAuthors);
+            Author[] authors = null;
+            if (authorsGraph == null)
+            {
+                authors = new Author[0];
+            }
+            else
+            {
+                authors = (Author[])authorsGraph;
+                int max = 0;
+                foreach (Author author in authors)// save edende max id'ni tapib counter'e set edirik.
+                {
+                    if (author.Id > max)
+                    {
+                        max = author.Id;
+                    }
+                }
+                Author.SetCounter(max);
+            }
+
              
             int len;
             int id;
@@ -27,11 +71,14 @@ namespace BookSystem.App
             switch (m)
             {
                 //show all books
+
                 case MenuStates.BooksAll:
+                    Console.Clear();
                     Console.WriteLine("List of books...");
                     foreach (var book in books)
                     {
-                        Console.WriteLine(book);
+                        var author = authors.FirstOrDefault(a=>a.Id==book.AuthorId);
+                        Console.WriteLine(book.ToString(author));
                     }
                     goto l1;
 
@@ -68,12 +115,27 @@ namespace BookSystem.App
 
 
                 case MenuStates.BookAdd:
+
+
+                    ShowAllAuthors(authors);
+                    int authorId;
+                    l2:
+                    authorId = Helpers.ReadInt("Muellif kodunu daxil edin: ", minValue:1);
+
+                    var selectedAuthor = new Author(authorId);
+
+                    if (Array.IndexOf(authors,selectedAuthor)==-1)
+                    {
+                        Helpers.PrintError("Siyahidan secin");
+                        goto l2;
+                    }
+
                     len = books.Length;
                     Array.Resize(ref books, len + 1);
 
                     books[len] = new Book();
+                    books[len].AuthorId = authorId;
                     books[len].Name = Helpers.ReadString("Kitabin adi: ", true);
-                    books[len].Author = Helpers.ReadString("Kitabin muellifi: ", true);
                     books[len].PageCount = Helpers.ReadInt("Kitabin sehife sayi: ", 1);
                     books[len].Price = Helpers.ReadDouble("Kitabin qiymeti: ", 0.50);
                     Console.Clear();
@@ -103,12 +165,19 @@ namespace BookSystem.App
                             itemByEdit.Name = nameByEdit;
                         }
 
-                        string authorByEdit = Helpers.ReadString("Kitabin muellifi: ");
+                        ShowAllAuthors(authors);
+                        int authorIdForEdit;
+                    l3:
+                        authorIdForEdit = Helpers.ReadInt("Muellif kodunu daxil edin: ", minValue: 1);
 
-                        if (!string.IsNullOrWhiteSpace(authorByEdit))
+                        var selectedAuthorForEdit = new Author(authorIdForEdit);
+
+                        if (Array.IndexOf(authors, selectedAuthorForEdit) == -1)
                         {
-                            itemByEdit.Author = authorByEdit;
+                            Helpers.PrintError("Siyahidan secin");
+                            goto l3;
                         }
+                            itemByEdit.AuthorId = authorIdForEdit;
 
                         itemByEdit.PageCount = Helpers.ReadInt("Kitabin sehife sayi: ", 1);
                         itemByEdit.Price = Helpers.ReadDouble("Kitabin qiymeti: ", 0.50);
@@ -145,11 +214,9 @@ namespace BookSystem.App
 
                 case MenuStates.AuthorAll:
 
-                    Console.WriteLine("List of authors...");
-                    foreach (var author in authors)
-                    {
-                        Console.WriteLine(author);
-                    }
+                    Console.Clear();
+                    ShowAllAuthors(authors);
+
                     goto l1;
                 case MenuStates.AuthorById:
 
@@ -239,7 +306,14 @@ namespace BookSystem.App
                     goto case MenuStates.AuthorAll;
 
                 case MenuStates.Save:
-                    break;
+
+                    Helpers.SaveToFile(fileBooks,books);
+                    Helpers.SaveToFile(fileAuthors,authors);
+
+                    Console.Clear();
+                    Console.WriteLine("Saved!");
+                    goto l1;
+
                 case MenuStates.Exit:
                     Helpers.PrintError("Tesdiq ucun <Enter> duymesini sixin.Eks halda Menuya qayidacaq.");
                     if (Console.ReadKey().Key==ConsoleKey.Enter)
@@ -250,6 +324,15 @@ namespace BookSystem.App
                     goto l1;
                 default:
                     break;
+            }
+        }
+
+        static void ShowAllAuthors(Author[] authors)
+        {
+            Console.WriteLine("List of authors...");
+            foreach (var author in authors)
+            {
+                Console.WriteLine(author);
             }
         }
     }

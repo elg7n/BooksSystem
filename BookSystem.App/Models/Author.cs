@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace BookSystem.App.Models
 {
-    internal class Author:IEquatable<Author>
+    [Serializable]
+    public class Author:IEquatable<Author>
     {
+        
         static int counter = 0;
 
         public Author()
@@ -20,6 +22,12 @@ namespace BookSystem.App.Models
         {
             this.Id = id;
         }
+
+        public static void SetCounter(int counter)
+        {
+            Author.counter = counter;
+        }
+
         public int Id { get; private set; }
         public string Name { get; set; }
         public string Surname { get; set; }
